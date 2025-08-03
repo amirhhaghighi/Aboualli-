@@ -227,3 +227,21 @@ class TokenRewardViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = TokenRewardHistorySerializer(rewards, many=True)
         return Response(serializer.data)
 
+
+class TokenRewardHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet برای مشاهده تاریخچه جایزه‌های توکن"""
+    serializer_class = TokenRewardHistorySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return TokenRewardHistory.objects.filter(user=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def my_history(self, request):
+        """دریافت تاریخچه جایزه‌های کاربر"""
+        user = request.user
+        history = TokenRewardHistory.objects.filter(user=user).order_by('-created_at')
+        
+        serializer = TokenRewardHistorySerializer(history, many=True)
+        return Response(serializer.data)
+
